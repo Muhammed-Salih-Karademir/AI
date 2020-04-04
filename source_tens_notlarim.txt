@@ -1,0 +1,50 @@
+Herşeyden önce nvidia driveri yandaki linke uygun olmalıdır.
+ https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
+
+1)tensorflow'u indiriyoruz .yaklaşık 520 MB dosya iniyor.
+	dosyanın içinde configure.py var bu dosyanın içinde hangi cuda paketlerinin hangi cuDNN ile 		yüklenmesi gerektiği hangi bazel sürümünün yüklenmesi gerektiği yazıyor.
+	
+	git clone https://github.com/tensorflow/tensorflow.git
+	cd tensorflow
+	git checkout r1.13
+
+2)CUDA sitesinden  cuda_10.0.130_410.48_linux yani configure.py da belirtiği üzere CUDA 10'u kurmalısınız.
+	yüzde yüz gelene kadar entere basmalısınız ardından devam edecektir. 
+
+3)Ardından cuDNN'in CUDA 10 ile uyumlu olan cuDNN version 7.5 i indiriyoruz.cudnn-10.0-linux-x64-v7.5.0.56
+	***cuDNN paketlerini CUDA içine kopyalayan komutlar yazılmalı.***
+
+4) bazel 0.19.2 kurulmalı.
+	https://github.com/bazelbuild/bazel/releases/download/0.19.2/bazel-0.19.2-installer-linux-x86_64.sh
+	chmod +x bazel-0.19.2-installer-linux-x86_64.sh
+	sudo ./bazel-0.19.2-installer-linux-x86_64.sh
+
+4.1) bazel paketleri derlerken çok fazla RAM kullanıyor eğer 8GB ramıniz varsa lütfen swap alanı oluşturun.
+
+	sudo swapoff /swapfile
+	sudo fallocate -l 8G /swapfile
+	sudo chmod 600 /swapfile
+	sudo mkswap /swapfile
+	sudo swapon /swapfile
+
+5)indirdiğimiz tensorflow klasörünün içine girip ./configure komutunu çalıştırıyoruz.
+	***sorulan sorulara cevap vermeliyiz. o komutlar yazılacak.***
+	python3 için ayarlanmalıdır.
+
+6) configure başarı ile tamanlandıktan sonra bazel ile tensorflow u' cuda avx msse gidi donanımsal destekler ile derliyoruz.
+bazel derleme komutu :
+	bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --host_force_python=PY3 --copt=-mfpmath=both --copt=-msse4.2 --config=cuda -k --verbose_failures //tensorflow/toolspip_package:build_pip_package
+
+
+*Bu derleme makinenize göre saatlerce sürebilir.
+7)Başarıyla derledikten sonra son dokunuşlarımız,
+	./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+	//pip paketleri için
+8)yeniden python3 paketlerini kuruyoruz.
+	pip3 install --upgrade --force-reinstall /tmp/tensorflow_pkg/tensorflow*.whl
+	
+INFO: Elapsed time: 6867.096s, Critical Path: 211.09s, Remote (0.00% of the time): [queue: 0.00%, setup: 0.00%, process: 0.00%]
+INFO: 10692 processes: 10692 local.
+INFO: Build completed successfully, 13856 total actions
+
+https://medium.com/@isaaclascasas/tensorflow-from-source-in-ubuntu-18-4b5dcca910b9
