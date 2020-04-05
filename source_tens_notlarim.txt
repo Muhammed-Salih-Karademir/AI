@@ -1,6 +1,6 @@
 Herşeyden önce nvidia driveri yandaki linke uygun olmalıdır.
  https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
-
+Driver 440 seçince çalışıyor.
 1)tensorflow'u indiriyoruz .yaklaşık 520 MB dosya iniyor.
 	dosyanın içinde configure.py var bu dosyanın içinde hangi cuda paketlerinin hangi cuDNN ile 		yüklenmesi gerektiği hangi bazel sürümünün yüklenmesi gerektiği yazıyor.
 	
@@ -18,12 +18,12 @@ Herşeyden önce nvidia driveri yandaki linke uygun olmalıdır.
 3)Ardından cuDNN'in CUDA 10 ile uyumlu olan cuDNN version 7.5 i indiriyoruz.cudnn-10.0-linux-x64-v7.5.0.56
 	***cuDNN paketlerini CUDA içine kopyalayan komutlar yazılmalı.***
 
-4) bazel 0.19.2 kurulmalı.
+4) bazel 0.19.2 kurulmalı. //bu versionlar uyumlu olmak zorundır. Tensorflow işte.
 	https://github.com/bazelbuild/bazel/releases/download/0.19.2/bazel-0.19.2-installer-linux-x86_64.sh
 	chmod +x bazel-0.19.2-installer-linux-x86_64.sh
 	sudo ./bazel-0.19.2-installer-linux-x86_64.sh
 
-4.1) bazel paketleri derlerken çok fazla RAM kullanıyor eğer 8GB ramıniz varsa lütfen swap alanı oluşturun.
+4.1) bazel tensorflow paketlerini derlerken çok fazla RAM kullanıyor eğer 8GB ramıniz varsa lütfen swap alanı oluşturun.
 
 	sudo swapoff /swapfile
 	sudo fallocate -l 8G /swapfile
@@ -31,11 +31,11 @@ Herşeyden önce nvidia driveri yandaki linke uygun olmalıdır.
 	sudo mkswap /swapfile
 	sudo swapon /swapfile
 
-5)indirdiğimiz tensorflow klasörünün içine girip ./configure komutunu çalıştırıyoruz.
+5) indirdiğimiz tensorflow klasörünün içine girip ./configure komutunu çalıştırıyoruz.
 	***sorulan sorulara cevap vermeliyiz. o komutlar yazılacak.***
 	python3 için ayarlanmalıdır.
 
-6) configure başarı ile tamanlandıktan sonra bazel ile tensorflow u' cuda avx msse gidi donanımsal destekler ile derliyoruz.
+6) configure başarı ile tamanlandıktan sonra bazel ile tensorflow u' cuda avx2 msse gidi donanımsal destekler ile derliyoruz.
 bazel derleme komutu :
 	bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --host_force_python=PY3 --copt=-mfpmath=both --copt=-msse4.2 --config=cuda -k --verbose_failures //tensorflow/tools/pip_package:build_pip_package
 
